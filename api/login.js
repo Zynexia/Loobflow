@@ -14,8 +14,7 @@ export async function verifyShopifyToken(token) {
     if (!response.ok) throw new Error('Invalid Shopify token');
 
     const data = await response.json();
-    // Du kannst die Benutzerinfo bei Bedarf hier anpassen
-    return { email: 'shopify-user@example.com' };
+    return { email: 'shopify-user@example.com' }; // Du kannst hier echte Userdaten verarbeiten
   } catch (error) {
     console.error('Shopify token verification failed:', error);
     return null;
