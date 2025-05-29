@@ -1,0 +1,1 @@
+// Fetch-Wrapper für Shopify/Webflow APIs
