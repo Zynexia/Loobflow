@@ -1,1 +1,67 @@
-<!-- Einstiegspunkt der Web-App -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Loobflow trifft Shopify</title>
+</head>
+<body>
+  <h1>Login</h1>
+  <form id="login-form">
+    <label>
+      Provider:
+      <select name="provider" id="provider">
+        <option value="shopify">Shopify</option>
+        <option value="webflow">Webflow</option>
+      </select>
+    </label>
+    <br />
+
+    <label>
+      Token:
+      <input type="text" id="token" name="token" required />
+    </label>
+    <br />
+
+    <div id="shop-container" style="display: none">
+      <label>
+        Shopify Domain:
+        <input type="text" id="shop" name="shop" placeholder="your-shop.myshopify.com" />
+      </label>
+      <br />
+    </div>
+
+    <button type="submit">Login</button>
+  </form>
+
+  <pre id="response"></pre>
+
+  <script>
+    const providerSelect = document.getElementById('provider');
+    const shopContainer = document.getElementById('shop-container');
+
+    providerSelect.addEventListener('change', () => {
+      shopContainer.style.display = providerSelect.value === 'shopify' ? 'block' : 'none';
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const provider = document.getElementById('provider').value;
+      const token = document.getElementById('token').value;
+      const shop = document.getElementById('shop').value;
+
+      const payload = { provider, token };
+      if (provider === 'shopify') payload.shop = shop;
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+    });
+  </script>
+</body>
+</html>
