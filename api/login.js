@@ -1,32 +1,42 @@
-// api/login.js
-import { createJWT } from '../utils/jwt.js';
-import { verifyShopifyToken, verifyWebflowToken } from '../utils/apiClient.js';
+// utils/apiClient.js
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import fetch from 'node-fetch';
 
-  const { token, provider } = req.body;
-
+export async function verifyShopifyToken(token) {
   try {
-    let userData;
+    const response = await fetch('https://your-shop-name.myshopify.com/admin/oauth/access_scopes.json', {
+      headers: {
+        'X-Shopify-Access-Token': token,
+        'Content-Type': 'application/json'
+      }
+    });
 
-    if (provider === 'shopify') {
-      userData = await verifyShopifyToken(token);
-    } else if (provider === 'webflow') {
-      userData = await verifyWebflowToken(token);
-    } else {
-      return res.status(400).json({ error: 'Unsupported provider' });
-    }
+    if (!response.ok) throw new Error('Invalid Shopify token');
 
-    if (!userData || !userData.email) {
-      return res.status(401).json({ error: 'Invalid or expired token' });
-    }
-
-    const jwt = createJWT({ email: userData.email, provider });
-    return res.status(200).json({ token: jwt });
+    const data = await response.json();
+    // Du kannst die Benutzerinfo bei Bedarf hier anpassen
+    return { email: 'shopify-user@example.com' };
   } catch (error) {
-    return res.status(500).json({ error: 'Authentication failed', details: error.message });
+    console.error('Shopify token verification failed:', error);
+    return null;
+  }
+}
+
+export async function verifyWebflowToken(token) {
+  try {
+    const response = await fetch('https://api.webflow.com/v2/user', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json'
+      }
+    });
+
+    if (!response.ok) throw new Error('Invalid Webflow token');
+
+    const user = await response.json();
+    return { email: user.email || 'webflow-user@example.com' };
+  } catch (error) {
+    console.error('Webflow token verification failed:', error);
+    return null;
   }
 }
